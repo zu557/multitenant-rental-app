@@ -9,6 +9,7 @@ import {Navbar} from "@/modules/home/ui/components/navbar";
 import { Suspense } from "react";
 import { SearchFilters } from "./search-filters";
 import { Category } from '@/payload-types';
+import { CustomCategory } from './types';
 
 interface Props {
   children: React.ReactNode;
@@ -28,7 +29,7 @@ const Layout = async ({ children }: Props) => {
         },
       },
     });
-    const formattedData = data?.docs.map((category) => {
+    const formattedData: CustomCategory[] = data?.docs.map((category) => {
       return {
         ...category,
         subcategories: (category.subcategories?.docs ?? []).map((docs)=> ({

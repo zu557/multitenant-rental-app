@@ -11,7 +11,7 @@ interface CategoryDropdownProps {
 
 export const CategoryDropdown = ({ category, isActive, isNavigationHovered }: CategoryDropdownProps) => {
     return (
-        <Button variant="elevated" className={cn("h-11 px-4 bg-transparent  border-gray-300 rounded-full hover:bg-white hover:border-primary text-black", isActive && !isNavigationHovered && "bg-white border-primary hover:bg-black hover:text-white")}>
+        <Button variant="elevated" className={cn("h-11 px-4 bg-transparent  border-gray-200 rounded-full hover:bg-white hover:border-primary text-black", isActive && !isNavigationHovered && "bg-white border-primary hover:bg-black hover:text-white")}>
             {category.name}
         </Button>
     );

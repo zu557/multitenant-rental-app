@@ -9,7 +9,9 @@
     "start": "next start",
     "lint": "next lint",
     "generate:types": "payload generate:types",
-    "db:fresh":"payload migrate:fresh"
+    "db:fresh": "payload migrate:fresh",
+    "db:seed": "tsx src/seed.ts",
+    "db:reset": "npm run db:fresh && npm run db:seed"
   },
   "dependencies": {
     "@base-ui/react": "^1.1.0",
@@ -21,6 +23,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.2.4",
     "embla-carousel-react": "^8.6.0",
     "graphql": "^16.12.0",
     "input-otp": "^1.4.2",
