@@ -1,32 +1,72 @@
-// import {SearchParams} from "nuqs/server";
-// import { getQueryClient, trpc } from "@/trpc/server";
-// import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-// import { loadProductFilter } from "@/modules/products/searchParams";
-// import { ProductListView } from "@/modules/products/ui/views/product-list-views";
+import { SearchParams } from "nuqs/server";
+import { loadProductFilter } from "@/modules/products/searchParams";
+import { ProductListView } from "@/modules/products/ui/views/product-list-views";
 import { DEFAULT_LIMIT } from "@/constants";
+import { getPayload } from "payload";
+import config from "@payload-config";
 
-// interface Props {
-//   searchParams: Promise<SearchParams>;
-// }
+interface PageProps {
+  searchParams: Promise<SearchParams>;
+}
 
-// const Page = async ({ searchParams }: Props) => {
-const Page = async () => {
-  // const filters = await loadProductFilter(searchParams);
+type Filters = Awaited<ReturnType<typeof loadProductFilter>> & {
+  category?: string;
+};
 
-  // const queryClient = getQueryClient();
-  // void queryClient.prefetchInfiniteQuery(
-  //   trpc.products.getMany.infiniteQueryOptions({
-  //     ...filters,
-  //     limit:DEFAULT_LIMIT,
-  //   })
-  // );
+export const dynamic = "force-dynamic";
 
-  return (<div>Product list view</div>
-  //   <div>
-  // //   // <HydrationBoundary state={dehydrate(queryClient)}>
-  // //     // <ProductListView />
-  //   {/* </HydrationBoundary> */}
-  //   </div>
+const Page = async ({ searchParams }: PageProps) => {
+  const filters: Filters = await loadProductFilter(searchParams);
+
+  const payload = await getPayload({ config });
+
+  const where: any = {};
+
+  if (filters.category) {
+    where.category = { equals: filters.category };
+  }
+
+  if (filters.tags && filters.tags.length > 0) {
+    where.tags = { in: filters.tags };
+  }
+
+  if (filters.search) {
+    where.name = { like: filters.search };
+  }
+
+  if (filters.minPrice || filters.maxPrice) {
+    where.price = {};
+    if (filters.minPrice) where.price.gte = Number(filters.minPrice);
+    if (filters.maxPrice) where.price.lte = Number(filters.maxPrice);
+  }
+
+  let sort: string = "-createdAt"; // default
+
+if (filters.sort === "trending") {
+  sort = "-reviewCount";
+}
+
+if (filters.sort === "hot_and_new") {
+  sort = "-createdAt";
+}
+
+if (filters.sort === "curated") {
+  sort = "-createdAt";
+}
+
+  const products = await payload.find({
+  collection: "products",
+  limit: DEFAULT_LIMIT,
+  where,
+  sort,
+});
+
+
+  return (
+    <ProductListView
+      initialProducts={products.docs}
+      hasNextPage={products.hasNextPage}
+    />
   );
 };
 

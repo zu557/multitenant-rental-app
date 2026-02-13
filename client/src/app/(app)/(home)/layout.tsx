@@ -1,24 +1,22 @@
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
-// import { getQueryClient, trpc } from "@/trpc/server";
-// import { dehydrate,HydrationBoundary } from "@tanstack/react-query";
-import { Footer } from "@/modules/home/ui/components/footer";
-import {Navbar} from "@/modules/home/ui/components/navbar";
-// import { SearchFilterLoading, SearchFilters } from "../../../modules/home/ui/components/search-filter";
+  import { Footer } from "@/modules/home/ui/components/footer";
+  import { Navbar } from "@/modules/home/ui/components/navbar";
+  import {
+    SearchFilterLoading,
+    SearchFilters,
+  } from "../../../modules/home/ui/components/search-filter";
+  import { Suspense } from "react";
+  import { getPayload } from "payload";
+  import config from "@payload-config";
+import { CustomCategory } from "./types";
+import { Category } from "@/payload-types";
 
-import { Suspense } from "react";
-import { SearchFilters } from "./search-filters";
-import { Category } from '@/payload-types';
-import { CustomCategory } from './types';
+  interface Props {
+    children: React.ReactNode;
+  }
 
-interface Props {
-  children: React.ReactNode;
-}
+  const Layout = async ({ children }: Props) => {
+    const payload = await getPayload({ config });
 
-const Layout = async ({ children }: Props) => {
-    const payload = await getPayload({
-      config: configPromise,
-    })
     const data = await payload.find({
       collection: "categories",
       depth: 1,
@@ -41,39 +39,19 @@ const Layout = async ({ children }: Props) => {
       };
     });
    
-/* finally you convert this throuhgh formattedData
-Category {
-  id,
-  name,
-  subcategories: {
-    docs: [
-      { id, name, subcategories: {...} }
-    ]
-  }
-}
-in to the following 
-CustomCategory {
-  id,
-  name,
-  subcategories: [
-    { id, name, subcategories: undefined }
-  ]
-}
-*/
 
-  return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      {/* <HydrationBoundary state={dehydrate(queryClient)}>
-        <Suspense fallback={<SearchFilterLoading/>}> */}
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Navbar />
 
-      <SearchFilters data={formattedData} />
-        {/* </Suspense>
-      </HydrationBoundary> */}
-      <div className="flex-1">{children}</div>
-      <Footer />
-    </div>
-  )
-}
+        <Suspense fallback={<SearchFilterLoading />}>
+          <SearchFilters categories={formattedData} />
+        </Suspense>
 
-export default Layout;
+        <div className="flex-1">{children}</div>
+        <Footer />
+      </div>
+    );
+  };
+
+  export default Layout;

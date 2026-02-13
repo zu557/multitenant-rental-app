@@ -6,13 +6,13 @@ import { useRouter } from "next/navigation";
 
 interface Props {
   name: string;
-  id: string;
+  id: number;
   imageUrl?: string | null;
   tenantSlug: string;
-  tenantImageUrl?: string | null;
-  reviewRating: number;
+  // tenantImageUrl?: string | null;
+  // reviewRating: number;
   price: number;
-  reviewCount: number;
+  // reviewCount: number;
 }
 
 export const ProductCard = ({
@@ -20,9 +20,9 @@ export const ProductCard = ({
   id,
   imageUrl,
   tenantSlug,
-  tenantImageUrl,
-  reviewRating,
-  reviewCount,
+  // tenantImageUrl,
+  // reviewRating,
+  // reviewCount,
   price,
 }: Props) => {
   const router = useRouter();
@@ -46,7 +46,7 @@ export const ProductCard = ({
         <div className="p-4 border-y flex flex-col gap-3 flex-1">
           <h2 className="text-lg font-medium line-clamp-4">{name}</h2>
           <div className="flex items-center gap-2 " onClick={handleUserClick}>
-            {tenantImageUrl && (
+            {/* {tenantImageUrl && (
               <Image
                 alt={tenantSlug}
                 src={tenantImageUrl}
@@ -54,17 +54,17 @@ export const ProductCard = ({
                 height={16}
                 className="rounded-full border shrink-0 size-[16px]"
               />
-            )}
+            )} */}
             <p className="text-sm underline font-medium">{tenantSlug}</p>
           </div>
-          {reviewCount > 0 && (
+          {/* {reviewCount > 0 && (
             <div className="flex items-center gap-1">
               <StarIcon className="size-3.5 fill-black" />
               <p className="text-sm font-medium">
                 {reviewRating} ({reviewCount})
               </p>
             </div>
-          )}
+          )} */}
         </div>
         <div className="p-4">
           <div className="relative px-2 py-1 border bg-pink-600 w-fit">

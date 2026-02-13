@@ -8,6 +8,7 @@ import { NavbarSidebar } from "./nav-sidebar";
 import { MenuIcon } from "lucide-react";
 
 import { Poppins } from "next/font/google";
+import { useSession } from "@/hooks/use-session";
 // import { useTRPC } from "@/trpc/client";
 // import { useQuery } from "@tanstack/react-query";
 const poppins = Poppins({
@@ -45,8 +46,7 @@ const navbarItems = [
 ];
 
 export const Navbar = () => {
-  // const trpc = useTRPC();
-  // const session = useQuery(trpc.auth.session.queryOptions())
+  const session = useSession();
 
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -76,8 +76,7 @@ export const Navbar = () => {
         ))}
       </div>
 
-      {/* {session.data?.user ? ( */}
-      {false ? (
+      {session.data ? (
         <div className="hidden lg:flex">
           <Button
             asChild

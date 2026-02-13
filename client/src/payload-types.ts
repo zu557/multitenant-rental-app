@@ -71,6 +71,7 @@ export interface Config {
     media: Media;
     categories: Category;
     tenants: Tenant;
+    products: Product;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -86,6 +87,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     tenants: TenantsSelect<false> | TenantsSelect<true>;
+    products: ProductsSelect<false> | ProductsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -200,6 +202,66 @@ export interface Tenant {
   createdAt: string;
 }
 /**
+ * You must verify your account before creating products
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products".
+ */
+export interface Product {
+  id: number;
+  name: string;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Price in birr.
+   */
+  price: number;
+  category?: (number | null) | Category;
+  image?: (number | null) | Media;
+  refundPolicy?: ('30-day' | '14-day' | '7-day' | '3-day' | '1-day' | 'no-refunds') | null;
+  /**
+   * Protected content only visible to customers after purchase. Add product documentation , downloadable files, getting started guides, and bonus materials. Supports markdown formatting
+   */
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Check if you want to hide this product
+   */
+  isArchived?: boolean | null;
+  /**
+   * Check if you want to private this product
+   */
+  isPrivate?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -238,6 +300,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tenants';
         value: number | Tenant;
+      } | null)
+    | ({
+        relationTo: 'products';
+        value: number | Product;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -342,6 +408,23 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface TenantsSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products_select".
+ */
+export interface ProductsSelect<T extends boolean = true> {
+  name?: T;
+  description?: T;
+  price?: T;
+  category?: T;
+  image?: T;
+  refundPolicy?: T;
+  content?: T;
+  isArchived?: T;
+  isPrivate?: T;
   updatedAt?: T;
   createdAt?: T;
 }

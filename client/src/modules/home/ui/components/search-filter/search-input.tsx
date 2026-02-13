@@ -1,11 +1,10 @@
-
+"use client";
 import { Input } from "@/components/ui/input";
 import { BookmarkCheckIcon, ListFilterIcon, SearchIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { CategoriesSidebar } from "./categoriessidebar";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
-import { useTRPC } from "@/trpc/client";
+import { useSession } from "@/hooks/use-session";
 import Link from "next/link";
 
 interface Props {
@@ -15,8 +14,7 @@ interface Props {
 }
 export const SearchInput = ({ disabled,defaultValue,onChange }: Props) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const trpc = useTRPC();
-  const session = useQuery(trpc.auth.session.queryOptions());
+  const session = useSession();
   const [searchValue, setSearchValue] = useState(defaultValue || "");
 
   useEffect(() => {
@@ -56,7 +54,7 @@ export const SearchInput = ({ disabled,defaultValue,onChange }: Props) => {
       >
         <ListFilterIcon className="" />
       </Button>
-      {session.data?.user && (
+      {session.data?.id && (
         <Button asChild variant={"elevated"}>
           <Link prefetch href={"/library"}>
             <BookmarkCheckIcon />

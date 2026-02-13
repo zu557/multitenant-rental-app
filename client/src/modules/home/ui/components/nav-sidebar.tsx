@@ -7,8 +7,7 @@ import {
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Link from "next/link";
-// import { useQuery } from "@tanstack/react-query";
-// import { useTRPC } from "@/trpc/client";
+import { useSession } from "@/hooks/use-session";
 import { Button } from "@/components/ui/button";
 
 
@@ -23,8 +22,7 @@ interface Props {
   onOpenChange: (open: boolean) => void;
 }
 export const NavbarSidebar = ({ items, open, onOpenChange }: Props) => {
-  // const trpc = useTRPC();
-  // const session = useQuery(trpc.auth.session.queryOptions());
+  const session = useSession();
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -46,8 +44,7 @@ export const NavbarSidebar = ({ items, open, onOpenChange }: Props) => {
             </Link>
           ))}
           <div className=" border-t-slate-800 border-t">
-            {/* {session.data?.user ? ( */}
-            {false ? (
+            {session.data ? (
               <>
                 <Link
                   href={"/library"}
