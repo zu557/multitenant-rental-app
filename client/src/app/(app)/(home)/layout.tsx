@@ -31,7 +31,8 @@ const Layout = async ({ children }: Props) => {
     });
     const formattedData: CustomCategory[] = data?.docs.map((category) => {
       return {
-        ...category,
+        ...category,//Copy all properties of category
+        //the below is equivalent to const subcats = category.subcategories?.docs || [];
         subcategories: (category.subcategories?.docs ?? []).map((docs)=> ({
           // because of the "depth: 1" we are confident docs will be of type Category
           ...(docs as Category ),
@@ -40,7 +41,25 @@ const Layout = async ({ children }: Props) => {
       };
     });
    
-
+/* finally you convert this throuhgh formattedData
+Category {
+  id,
+  name,
+  subcategories: {
+    docs: [
+      { id, name, subcategories: {...} }
+    ]
+  }
+}
+in to the following 
+CustomCategory {
+  id,
+  name,
+  subcategories: [
+    { id, name, subcategories: undefined }
+  ]
+}
+*/
 
   return (
     <div className="flex flex-col min-h-screen">
