@@ -8,7 +8,13 @@ export function useSession() {
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-    fetch("/api/session")
+    fetch("/api/users/me", {
+      method: "GET",
+      credentials: "include", // Important to include cookies)
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
       .then(async (res) => {
         if (!res.ok) return null;
         const json = await res.json();

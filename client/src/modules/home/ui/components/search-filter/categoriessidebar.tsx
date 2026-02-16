@@ -13,12 +13,13 @@ import { useState } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { Category } from "@/payload-types";
+import { CategoriesGetManyOutputSingle } from "@/modules/categories/types";
 // import { useCategories } from "@/hooks/use-categories";
 
 interface Props {
   open: boolean;
   onOpenChangeAction: (open: boolean) => void;
-  data: Category[];
+  data: CategoriesGetManyOutputSingle[] | null;
 }
 
 export const CategoriesSidebar = ({
@@ -40,7 +41,7 @@ export const CategoriesSidebar = ({
     onOpenChangeAction(open);
   };
  
-  const handleCategoryClick = (category: Category) => {
+  const handleCategoryClick = (category: CategoriesGetManyOutputSingle) => {
     if (category?.subcategories && category.subcategories?.length > 0) {
       // Show subcategories
       setViewingSubcategories({
@@ -101,7 +102,7 @@ export const CategoriesSidebar = ({
               Back
             </button>
           )}
-          {displayCategories.map((category) => (
+          {displayCategories.map((category: CategoriesGetManyOutputSingle) => (
             <button
               onClick={() => handleCategoryClick(category)}
               key={category.slug}

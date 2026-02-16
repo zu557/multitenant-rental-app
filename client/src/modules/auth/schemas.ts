@@ -22,3 +22,6 @@ export const loginSchema = z.object({
   email: z.string().email().trim(),
   password: z.string().min(1, "Password cannot be empty"),
 });
+
+export type LoginSchema = z.infer<typeof loginSchema>;
+export type RegisterSchema = z.infer<typeof registerSchema>;

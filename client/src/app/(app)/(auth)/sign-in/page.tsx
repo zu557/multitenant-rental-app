@@ -7,8 +7,10 @@ export const dynamic = "force-dynamic";
 
 const Page = async () => {
   const user = await getSession();
+  // console.log("Current user session:", user);
 
-  if (user) redirect("/");
+  if (user) redirect("/admin");
+
 
   return <SignInView />;
 };

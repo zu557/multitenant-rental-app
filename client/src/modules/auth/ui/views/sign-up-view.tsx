@@ -1,86 +1,133 @@
 "use client";
 
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import z from "zod";
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 
-import { registerSchema } from "../../schemas";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+import { registerSchema, RegisterSchema } from "@/modules/auth/schemas";
+
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { Poppins } from "next/font/google";
+import { cn } from "@/lib/utils";
+
 const poppins = Poppins({
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
-  weight: ["700"],
+  variable: "--font-poppins",
 });
 
-export const SignUpView = () => {
+const SignUpView = () => {
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof registerSchema>>({
-    mode: "all",
+  const form = useForm<RegisterSchema>({
     resolver: zodResolver(registerSchema),
+    mode: "all",
     defaultValues: {
+      username: "",
       email: "",
       password: "",
-      username: "",
     },
   });
 
   const username = form.watch("username");
-  const usernameErrors = form.formState.errors.username;
-  const showPreview = username && !usernameErrors;
+  const usernameError = form.formState.errors.username;
+  const showPreview = username && !usernameError;
 
-  const onSubmit = async (values: z.infer<typeof registerSchema>) => {
+  const onSubmit = async (values: RegisterSchema) => {
     try {
-      // Create user in Payload
-      const res = await fetch("/api/users", {
+      // 1️⃣ Check username
+      const usernameCheck = await fetch(
+        `/api/users?where[username][equals]=${values.username}`
+      );
+      const usernameData = await usernameCheck.json();
+
+       if (usernameData.totalDocs > 0) {
+      toast.error("Username already taken");
+      return;
+    }
+
+      // 2️⃣ Check email
+      const emailCheck = await fetch(
+        `/api/users?where[email][equals]=${values.email}`
+      );
+      const emailData = await emailCheck.json();
+
+       if (emailData.totalDocs > 0) {
+      toast.error("Email already exists");
+      return;
+    }
+
+      // 3️⃣ Create tenant
+      const tenantRes = await fetch("/api/tenants", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: values.username,
+          slug: values.username,
+        }),
       });
 
-      const data = await res.json();
+      const tenantData = await tenantRes.json();
 
-      if (!res.ok) {
-        throw new Error(data.errors?.[0]?.message || "Registration failed");
+      if (!tenantRes.ok) {
+        throw new Error(tenantData.message || "Failed to create tenant");
       }
 
-      // Auto-login after register (optional but recommended)
+      // 4️⃣ Create user
+      const userRes = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: values.email,
+          username: values.username,
+          password: values.password,
+          // tenants: [{ tenant: tenantData.doc.id }],
+        }),
+      });
+
+      const userData = await userRes.json();
+
+      if (!userRes.ok) {
+        throw new Error(userData.message || "Failed to create user");
+      }
+
+      // 5️⃣ Login user
       const loginRes = await fetch("/api/users/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // VERY IMPORTANT for cookies
         body: JSON.stringify({
           email: values.email,
           password: values.password,
         }),
       });
 
+      const loginData = await loginRes.json();
+
       if (!loginRes.ok) {
-        throw new Error("Account created but login failed");
+        throw new Error(loginData.message || "Login failed");
       }
 
       toast.success("Account created successfully!");
-      router.push("/");
+      router.push("/admin");
       router.refresh();
+
     } catch (error: any) {
       toast.error(error.message || "Something went wrong");
     }
@@ -88,45 +135,51 @@ export const SignUpView = () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5">
-      <div className="bg-[#f4f4f0] h-screen w-full lg:col-span-3 overflow-y-auto">
+      {/* Left */}
+      <div className="h-screen w-full bg-[#F4F4F0] lg:col-span-3 overflow-y-auto">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-8 p-4 lg:p-16 "
+            className="flex flex-col gap-6 p-8 lg:p-16"
           >
-            <div className="flex items-center justify-between mb-8 ">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-8">
               <Link href="/">
-                <span className={cn("text-2xl font-semibold", poppins.className)}>
-                  funroad
+                <span
+                  className={cn(
+                    "text-3xl tracking-tighter font-semibold",
+                    poppins.className
+                  )}
+                >
+                  MetaShopper.
                 </span>
               </Link>
 
-              <Button
-                asChild
-                variant={"ghost"}
-                size={"sm"}
-                className="text-base border-none underline"
-              >
-                <Link prefetch href={"/sign-in"}>Sign in</Link>
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/sign-in">Sign In</Link>
               </Button>
             </div>
 
-            <h1 className="text-4xl font-medium">
-              Join over 1,654 creators earning money on Funroad.
-            </h1>
+            <h2 className="text-4xl font-medium">
+              Join over 1000+ retailers and start earning on MetaShopper.
+            </h2>
 
+            {/* Username */}
             <FormField
+              control={form.control}
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-base">Username</FormLabel>
+                  <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input placeholder="yourstore" {...field} />
                   </FormControl>
 
-                  <FormDescription className={cn("hidden", showPreview && "block")}>
-                    Your Store will be available at&nbsp;
-                    <strong>{username}</strong>
+                  <FormDescription
+                    className={cn("hidden", showPreview && "block")}
+                  >
+                    Your store will be available at&nbsp;
+                    <strong>{username}</strong>.shop.com
                   </FormDescription>
 
                   <FormMessage />
@@ -134,38 +187,42 @@ export const SignUpView = () => {
               )}
             />
 
+            {/* Email */}
             <FormField
+              control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-base">Email</FormLabel>
+                  <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input {...field} type="email" />
+                    <Input type="email" placeholder="you@email.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
+            {/* Password */}
             <FormField
+              control={form.control}
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-base">Password</FormLabel>
+                  <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input {...field} type="password" />
+                    <Input type="password" placeholder="********" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
+            {/* Submit */}
             <Button
-              disabled={form.formState.isSubmitting}
               type="submit"
-              size={"lg"}
-              variant={"elevated"}
-              className="bg-black text-white hover:bg-slate-600 hover:text-primary"
+              disabled={form.formState.isSubmitting}
+              className="bg-black text-white hover:bg-yellow-300 hover:text-black"
+              variant="elevated"
             >
               {form.formState.isSubmitting ? "Creating..." : "Create Account"}
             </Button>
@@ -173,14 +230,17 @@ export const SignUpView = () => {
         </Form>
       </div>
 
+      {/* Right */}
       <div
         className="h-screen w-full lg:col-span-2 hidden lg:block"
         style={{
-          backgroundImage: "url('/auth-bg.png')",
-          backgroundSize: "cover",
+          backgroundImage: "url('/bg.jpg')",
           backgroundPosition: "center",
+          backgroundSize: "cover",
         }}
       />
     </div>
   );
 };
+
+export default SignUpView;

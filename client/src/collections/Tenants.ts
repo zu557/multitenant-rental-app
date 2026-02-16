@@ -8,6 +8,7 @@ export const Tenants: CollectionConfig = {
   access: {
     // Standard Payload access (Defaults to 'anyone logged in' if not defined)
     read: () => true,
+     create: () => true,
   },
   fields: [
     {

@@ -56,7 +56,7 @@ export const SignInView = () => {
       }
 
       toast.success("Logged in successfully!");
-      router.push("/");
+      router.push("/admin");
       router.refresh();
     } catch (error: any) {
       toast.error(error.message || "Something went wrong");
